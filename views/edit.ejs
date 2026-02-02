@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Complete Profile</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Complete Profile</h1>
+        <% if (error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+        <form action="/profile" method="POST">
+            <input type="text" name="address" placeholder="Address" value="<%= profile?.address || '' %>" required>
+            <input type="tel" name="phone" placeholder="Phone Number" value="<%= profile?.phone || '' %>" required>
+            <input type="url" name="linkedin" placeholder="LinkedIn URL" value="<%= profile?.linkedin || '' %>" required>
+            <input type="url" name="github" placeholder="GitHub URL" value="<%= profile?.github || '' %>" required>
+            <input type="text" name="skills" placeholder="Skills (comma separated)" value="<%= profile?.skills || '' %>" required>
+            <input type="text" name="branch" placeholder="Branch" value="<%= profile?.branch || '' %>" required>
+            <input type="text" name="first_school" placeholder="First School" value="<%= profile?.first_school || '' %>" required>
+            <div class="warning">Warning: Never share your first school information publicly!</div>
+            <button type="submit">Save Profile</button>
+        </form>
+        <div class="links">
+            <a href="/dashboard">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

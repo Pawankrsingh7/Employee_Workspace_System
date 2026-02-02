@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        /* Keep all your existing CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+
+        header {
+            background: #35424a;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        header a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        table th {
+            background: #35424a;
+            color: #fff;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 5px 10px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn-approve {
+            background: #28a745;
+        }
+
+        .btn-reject {
+            background: #dc3545;
+        }
+
+        .btn-unblock {
+            background: #ffc107;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+        }
+
+        .logout-btn {
+            float: right;
+            background: #dc3545;
+            color: #fff;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .admin-nav {
+            margin: 20px 0;
+            padding: 10px;
+            background: #fff;
+            border-radius: 5px;
+        }
+
+        .admin-nav a {
+            margin-right: 15px;
+            padding: 8px 15px;
+            background: #35424a;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+
+        .admin-nav a:hover {
+            background: #465360;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Replace the initialization block at the top of admin.ejs -->
+    <body>
+        <% 
+            // Initialize variables safely using locals
+            const blockedUsers = typeof locals.blockedUsers !== 'undefined' ? locals.blockedUsers : [];
+            const unblockRequests = typeof locals.unblockRequests !== 'undefined' ? locals.unblockRequests : [];
+            const signupRequests = typeof locals.signupRequests !== 'undefined' ? locals.signupRequests : [];
+            const activeUsers = typeof locals.activeUsers !== 'undefined' ? locals.activeUsers : [];
+        %>
+    
+        <!-- Rest of your template -->
+        <header>
+            <div class="container">
+                <h1>Admin Dashboard</h1>
+                <a href="/logout" class="logout-btn">Logout</a>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Navigation -->
+            <div class="admin-nav">
+                <a href="/admin">Dashboard</a>
+                <a href="/admin/signup-requests">Signup Requests (<%= signupRequests.length %>)</a>
+                <a href="/admin/active-users">Active Users (<%= activeUsers.length %>)</a>
+            </div>
+
+            <!-- Blocked Users Section -->
+            <h2>Blocked Users</h2>
+            <table>
+                <!-- ... existing blocked users table ... -->
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>IP Address</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (blockedUsers && blockedUsers.length> 0) { %>
+                        <% blockedUsers.forEach(user=> { %>
+                            <tr>
+                                <td>
+                                    <%= user.username %>
+                                </td>
+                                <td>
+                                    <%= user.ip %>
+                                </td>
+                                <td>
+                                    <form action="/unblock-user" method="POST" style="display: inline;">
+                                        <input type="hidden" name="username" value="<%= user.username %>">
+                                        <button class="btn btn-unblock" type="submit">Unblock</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="3">No blocked users.</td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+
+            </table>
+
+            <!-- Unblock Requests Section -->
+            <h2>Unblock Requests</h2>
+            <table>
+                <!-- ... existing unblock requests table ... -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>IP Address</th>
+                            <th>Status</th>
+                            <th>Requested At</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (unblockRequests && unblockRequests.length> 0) { %>
+                            <% unblockRequests.forEach(request=> { %>
+                                <tr>
+                                    <td>
+                                        <%= request.username %>
+                                    </td>
+                                    <td>
+                                        <%= request.ip %>
+                                    </td>
+                                    <td>
+                                        <%= request.status %>
+                                    </td>
+                                    <td>
+                                        <%= new Date(request.created_at).toLocaleString("en-IN", {
+                                            timeZone: "Asia/Kolkata" }) %>
+                                    </td>
+                                    <td>
+                                        <form action="/approve-request" method="POST" style="display: inline;">
+                                            <input type="hidden" name="id" value="<%= request.id %>">
+                                            <button class="btn btn-approve" type="submit">Approve</button>
+                                        </form>
+                                        <form action="/reject-request" method="POST" style="display: inline;">
+                                            <input type="hidden" name="id" value="<%= request.id %>">
+                                            <button class="btn btn-reject" type="submit">Reject</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="5">No unblock requests.</td>
+                                        </tr>
+                                        <% } %>
+                    </tbody>
+                </table>
+            </table>
+
+            <!-- Pending Signup Requests Section -->
+            <h2>Pending Signup Requests</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Location</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (signupRequests.length> 0) { %>
+                        <% signupRequests.forEach(user=> { %>
+                            <tr>
+                                <td>
+                                    <%= user.username %>
+                                </td>
+                                <td>
+                                    <%= user.email %>
+                                </td>
+                                <td>
+                                    <%= user.location %>
+                                </td>
+                                <td>
+                                    <%= new Date(user.created_at).toLocaleString() %>
+                                </td>
+                                <td>
+                                    <form action="/admin/approve-user" method="POST" style="display: inline;">
+                                        <input type="hidden" name="userId" value="<%= user.id %>">
+                                        <button class="btn btn-approve" type="submit">Approve</button>
+                                    </form>
+                                    <form action="/admin/reject-user" method="POST" style="display: inline;">
+                                        <input type="hidden" name="userId" value="<%= user.id %>">
+                                        <button class="btn btn-reject" type="submit">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="5">No pending signup requests.</td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+
+            <!-- Active Users Section -->
+            <h2>Active Users</h2>
+            <table>
+                <tbody>
+                    <% if (activeUsers.length> 0) { %>
+                        <% activeUsers.forEach(user=> { %>
+                            <tr>
+                                <td>
+                                    <%= user.username %>
+                                </td>
+                                <td>
+                                    <%= user.email %>
+                                </td>
+                                <td>
+                                    <%= new Date(user.last_login_time).toLocaleString() %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="3">No active users.</td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Remove duplicate footer -->
+        <footer>
+            <p>&copy; 2025 Admin Dashboard</p>
+        </footer>
+</body>
+
+</html>

@@ -1,0 +1,292 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Virtual Workplace - Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            color: #1c1e21;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1, h2, h3 {
+            color: #1a73e8;
+            margin-bottom: 1rem;
+        }
+
+        .doc-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        code {
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Monaco, Consolas, "Courier New", monospace;
+        }
+
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .nav-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 250px;
+            background: #ffffff;
+            padding: 1rem;
+            border-right: 1px solid #ddd;
+        }
+
+        .content {
+            margin-left: 270px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-sidebar">
+        <h2>Documentation</h2>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#features">System Features</a></li>
+            <li><a href="#security">Security Protocols</a></li>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#usage">User Guide</a></li>
+            <li><a href="#admin">Admin Guide</a></li>
+            <li><a href="#api">API Reference</a></li>
+        </ul>
+    </div>
+
+    <div class="container content">
+        <div class="doc-section" id="overview">
+            <h1>Secure Virtual Workplace System</h1>
+            <p>A comprehensive security-focused collaboration platform with advanced access controls and real-time monitoring.</p>
+            <div class="warning">
+                <p><strong>⚠️ Important:</strong> This system requires MySQL database and Node.js runtime environment</p>
+            </div>
+        </div>
+
+        <div class="doc-section" id="features">
+            <h2>Core System Features</h2>
+            <div class="feature-category">
+                <h3>🔒 Security Features</h3>
+                <ul>
+                    <li>Geolocation Restriction (CUTM Campus Only)</li>
+                    <li>Time-Based Access (9 AM - 5:30 PM)</li>
+                    <li>5-Strike Brute Force Protection</li>
+                    <li>Automatic IP Blocking</li>
+                    <li>Secure Session Management</li>
+                </ul>
+                
+                <h3>👥 User Features</h3>
+                <ul>
+                    <li>Secure Notes Management</li>
+                    <li>Real-Time Collaboration</li>
+                    <li>Profile Management</li>
+                    <li>Activity Tracking</li>
+                </ul>
+
+                <h3>🛡️ Admin Features</h3>
+                <ul>
+                    <li>User Approval System</li>
+                    <li>Block/Unblock Management</li>
+                    <li>Real-Time Activity Monitoring</li>
+                    <li>Access Request Handling</li>
+                    <li>System Logs Audit</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="doc-section" id="security">
+            <h2>Security Protocols</h2>
+            <h3>Access Controls</h3>
+            <pre><code>
+1. IP Location Verification
+2. Time Window Restriction (9 AM - 5:30 PM)
+3. Bcrypt Password Hashing
+4. Session Encryption
+5. Automatic Account Lockout
+            </code></pre>
+
+            <h3>Risk Mitigation</h3>
+            <ul>
+                <li>5 failed attempts → Account block</li>
+                <li>Admin approval required for new signups</li>
+                <li>Automatic logout after 30min inactivity</li>
+                <li>All security events logged in block.log</li>
+            </ul>
+        </div>
+
+        <div class="doc-section" id="installation">
+            <h2>Installation Guide</h2>
+            <h3>Requirements</h3>
+            <ul>
+                <li>Node.js v18+</li>
+                <li>MySQL 8.0+</li>
+                <li>1GB RAM minimum</li>
+            </ul>
+
+            <h3>Setup Commands</h3>
+            <pre><code>
+# Clone repository
+git clone https://github.com/yourrepo/secure-workplace.git
+
+# Install dependencies
+npm install
+
+# Database setup
+mysql -u root -p -e "CREATE DATABASE dataclu;"
+mysql -u root -p dataclu < schema.sql
+
+# Start system
+npm start
+            </code></pre>
+        </div>
+
+        <div class="doc-section" id="usage">
+            <h2>User Guide</h2>
+            <h3>Account Setup</h3>
+            <ol>
+                <li>Visit <code>/signup</code> to register</li>
+                <li>Wait for admin approval</li>
+                <li>Login at <code>/login</code></li>
+            </ol>
+
+            <h3>Notes System</h3>
+            <ul>
+                <li>Create/edit notes at <code>/notes</code></li>
+                <li>Autosave every 30 seconds</li>
+                <li>Markdown formatting support</li>
+            </ul>
+
+            <div class="warning">
+                <p><strong>Note:</strong> All activities are logged including login/logout times</p>
+            </div>
+        </div>
+
+        <div class="doc-section" id="admin">
+            <h2>Administrator Guide</h2>
+            <h3>Access Requirements</h3>
+            <pre><code>
+Admin Credentials:
+Username: admin@*****
+Password: ********
+            </code></pre>
+
+            <h3>Admin Panel Features</h3>
+            <ul>
+                <li>Approve/Reject new registrations</li>
+                <li>Manage blocked users</li>
+                <li>View active sessions</li>
+                <li>Process unblock requests</li>
+                <li>Audit security logs</li>
+            </ul>
+
+            <h3>Common Operations</h3>
+            <pre><code>
+1. User Approval:
+   - Navigate to Signup Requests
+   - Click 'Approve' next to user
+
+2. Block User:
+   - Go to Active Users
+   - Select 'Block' action
+
+3. View Logs:
+   - Check block.log file
+   - Monitor rejected_requests table
+            </code></pre>
+        </div>
+
+        <div class="doc-section" id="api">
+            <h2>API Reference</h2>
+            <h3>Notes Endpoints</h3>
+            <table>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>/api/notes</code></td>
+                    <td>POST</td>
+                    <td>Create/Update notes</td>
+                </tr>
+                <tr>
+                    <td><code>/api/notes/:id</code></td>
+                    <td>GET</td>
+                    <td>Retrieve specific note</td>
+                </tr>
+                <tr>
+                    <td><code>/api/notes/:id</code></td>
+                    <td>DELETE</td>
+                    <td>Remove note</td>
+                </tr>
+            </table>
+
+            <h3>User Endpoints</h3>
+            <pre><code>
+POST /login - User authentication
+POST /signup - New registration
+GET /logout - Session termination
+            </code></pre>
+        </div>
+
+        <div class="doc-section">
+            <h2>Database Schema</h2>
+            <h3>Core Tables</h3>
+            <pre><code>
+users:
+- id, username, email, password, status, created_at
+
+blocked_users:
+- id, username, ip, blocked_at
+
+unblock_requests: 
+- id, username, status, request_time
+
+notes:
+- id, user_id, title, content, updated_at
+            </code></pre>
+            
+            <h3>License</h3>
+            <p>MIT License - Campus Use Only</p>
+            <p>Contact: techsupport@cutm.ac.in</p>
+        </div>
+    </div>
+</body>
+</html>

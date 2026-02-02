@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Detection - Secure Workforce Platform</title>
+    
+    <!-- External Resources -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --cyber-teal: #2dd4bf;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: #f8fafc;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, var(--cyber-teal), var(--primary-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--cyber-teal);
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8rem 5%;
+            background: linear-gradient(45deg, #1e3a8a, #0f766e);
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #fff, var(--cyber-teal));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(45deg, var(--primary-blue), var(--cyber-teal));
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+        }
+
+        .features-section {
+            padding: 5rem 5%;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: var(--cyber-teal);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(45, 212, 191, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--cyber-teal);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--cyber-teal);
+            margin-bottom: 1rem;
+        }
+
+        .security-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .step-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-left: 4px solid var(--cyber-teal);
+            border-radius: 8px;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem 0;
+        }
+
+        .testimonial-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        footer {
+            background: #0b1120;
+            padding: 4rem 5%;
+            margin-top: 5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding: 4rem 5%;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">AnomalyDetection</div>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#security">Security</a></li>
+            <li><a href="#admin">Admin</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="/document">Documentation</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" data-aos="fade-up">
+        <div class="hero-content">
+            <h1>Next-Gen Workforce Security Platform</h1>
+            <p>Protect your organization with AI-powered anomaly detection and advanced access controls</p>
+            <a href="/login" class="cta-button">
+                <i class="fas fa-lock"></i>
+                Get Started
+            </a>
+        </div>
+        <div class="hero-image">
+            <img src="SOC.png" alt="Security Illustration" style="max-width: 600px;">
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <h2 class="section-title" data-aos="fade-up">Core Features</h2>
+        <div class="features-grid">
+            <div class="feature-card" data-aos="zoom-in">
+                <i class="feature-icon fas fa-shield-alt"></i>
+                <h3>Smart Authentication</h3>
+                <ul>
+                    <li>Multi-factor Authentication</li>
+                    <li>Location-Based Access</li>
+                    <li>Time Restrictions</li>
+                </ul>
+            </div>
+
+            <div class="feature-card" data-aos="zoom-in" data-aos-delay="100">
+                <i class="feature-icon fas fa-bell"></i>
+                <h3>Threat Detection</h3>
+                <ul>
+                    <li>Brute Force Protection</li>
+                    <li>Suspicious Activity Alerts</li>
+                    <li>Auto-Block System</li>
+                </ul>
+            </div>
+
+            <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
+                <i class="feature-icon fas fa-user-cog"></i>
+                <h3>Admin Controls</h3>
+                <ul>
+                    <li>Central User Management</li>
+                    <li>Real-Time Monitoring</li>
+                    <li>Audit Logs</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security Section -->
+    <section class="features-section" id="security">
+        <h2 class="section-title" data-aos="fade-up">Security Protocol</h2>
+        <div class="security-steps">
+            <div class="step-card" data-aos="fade-right">
+                <h3>Real-Time Monitoring</h3>
+                <p>Continuous tracking of user activities and login attempts</p>
+            </div>
+
+            <div class="step-card" data-aos="fade-right" data-aos-delay="100">
+                <h3>Automated Defense</h3>
+                <p>Instant blocking after 5 failed attempts with detailed logs</p>
+            </div>
+
+            <div class="step-card" data-aos="fade-right" data-aos-delay="200">
+                <h3>Session Protection</h3>
+                <p>Automatic logout and session encryption</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Features -->
+    <section class="features-section" id="admin">
+        <h2 class="section-title" data-aos="fade-up">Admin Dashboard</h2>
+        <div class="features-grid">
+            <div class="feature-card" data-aos="zoom-in">
+                <i class="feature-icon fas fa-users-slash"></i>
+                <h3>Blocked Users</h3>
+                <p>Manage blocked accounts and review security events</p>
+            </div>
+
+            <div class="feature-card" data-aos="zoom-in" data-aos-delay="100">
+                <i class="feature-icon fas fa-file-alt"></i>
+                <h3>Audit Logs</h3>
+                <p>Detailed security reports and activity tracking</p>
+            </div>
+
+            <div class="feature-card" data-aos="zoom-in" data-aos-delay="200">
+                <i class="feature-icon fas fa-clock-rotate-left"></i>
+                <h3>Session History</h3>
+                <p>Review user login times and locations</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="footer-content">
+            <h3>Anomaly Detection</h3>
+            <p>Email: security@anomalydetection.com</p>
+            <p>24/7 Support: +1 (555) 123-4567</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.linkedin.com/in/pawan-kumar-79b617289/"><i class="fab fa-linkedin"></i></a>
+                <a href="github.com/Pawankrsingh7"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2024 Anomaly Detection. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true,
+            easing: 'ease-in-out'
+        });
+    </script>
+</body>
+</html>

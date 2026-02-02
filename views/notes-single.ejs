@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notes</title>
+    <link rel="stylesheet" href="/notes.css">
+</head>
+<body>
+    <div class="notes-container">
+        <!-- Left Sidebar -->
+        <div class="notes-sidebar">
+            <button class="new-note-btn" onclick="newNote()">New Note</button>
+            <div class="notes-list">
+                <% notes.forEach(note => { %>
+                    <div class="note-item" data-id="<%= note.id %>" onclick="loadNote(<%= note.id %>)">
+                        <%= note.title %>
+                    </div>
+                <% }); %>
+            </div>
+        </div>
+
+        <!-- Right Editor -->
+        <div class="notes-editor">
+            <input type="text" id="noteTitle" placeholder="Enter Note Name..." value="<%= currentNote ? currentNote.title : '' %>">
+            <textarea id="noteContent" placeholder="Start writing..."><%= currentNote ? currentNote.content : '' %></textarea>
+            <div class="editor-buttons">
+                <button onclick="saveNote()" class="save-btn">Save Note</button>
+                <button onclick="clearEditor()" class="clear-btn">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentNoteId = null;
+
+        function newNote() {
+            currentNoteId = null;
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+        }
+
+        async function loadNote(noteId) {
+            try {
+                const response = await fetch(`/api/notes/${noteId}`);
+                const note = await response.json();
+                
+                currentNoteId = noteId;
+                document.getElementById('noteTitle').value = note.title;
+                document.getElementById('noteContent').value = note.content;
+            } catch (error) {
+                console.error('Error loading note:', error);
+            }
+        }
+
+        async function saveNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteContent').value.trim();
+
+            if (!title) {
+                alert('Please enter a note name');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/notes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        noteId: currentNoteId,
+                        title: title,
+                        content: content
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.newId) {
+                        currentNoteId = result.newId;
+                    }
+                    window.location.reload(); // Refresh the notes list
+                }
+            } catch (error) {
+                console.error('Error saving note:', error);
+            }
+        }
+
+        function clearEditor() {
+            if (confirm('Are you sure you want to clear the editor?')) {
+                newNote();
+            }
+        }
+
+        // Load first note if available
+        <% if (notes.length > 0 && !currentNote) { %>
+            loadNote(<%= notes[0].id %>);
+        <% } %>
+    </script>
+</body>
+</html>

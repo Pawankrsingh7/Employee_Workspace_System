@@ -1,0 +1,109 @@
+/* General Styling */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0a0f1e, #102a44);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+
+/* Welcome Container */
+.welcome-container {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 20px rgba(0, 255, 170, 0.3);
+    transition: transform 0.3s ease-in-out;
+    animation: scaleUp 1s ease-in-out;
+}
+
+.welcome-container:hover {
+    transform: scale(1.05);
+}
+
+/* Heading */
+h1 {
+    font-size: 30px;
+    margin-bottom: 10px;
+    background: linear-gradient(45deg, #00feba, #5b86e5);
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: glow 1.5s infinite alternate;
+}
+
+/* Paragraph */
+p {
+    font-size: 18px;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+/* Button */
+.start-btn {
+    background: linear-gradient(90deg, #00feba, #5b86e5);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    box-shadow: 0 5px 15px rgba(0, 255, 170, 0.5);
+    animation: pulse 2s infinite;
+}
+
+.start-btn:hover {
+    background: linear-gradient(90deg, #5b86e5, #00feba);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 255, 170, 0.7);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.9);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 10px rgba(0, 255, 170, 0.7);
+    }
+    to {
+        text-shadow: 0 0 20px rgba(0, 255, 170, 1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 170, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(0, 255, 170, 0.5);
+    }
+}

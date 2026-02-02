@@ -1,0 +1,130 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1e1e2e;
+    margin: 0;
+    padding: 0;
+    color: white;
+}
+
+.notes-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar Styles */
+.notes-sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #2a3f54, #1c2833);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.notes-sidebar h2 {
+    color: #42f58d;
+    font-size: 20px;
+}
+
+.new-note-btn {
+    background-color: #42f58d;
+    color: black;
+    font-weight: bold;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.new-note-btn:hover {
+    background-color: #36c874;
+}
+
+.notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.note-item {
+    background-color: #2a2a40;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.note-item:hover {
+    background-color: #3a3a50;
+}
+
+.note-item .pin {
+    color: red;
+    margin-right: 5px;
+}
+
+/* Editor Styles */
+.notes-editor {
+    flex: 1;
+    background-color: #20202d;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.notes-editor input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #151521;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.notes-editor textarea {
+    flex: 1;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #151521;
+    color: white;
+}
+
+.editor-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.save-btn {
+    background-color: #ff66b2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.clear-btn {
+    background-color: #ffb266;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.save-btn:hover {
+    background-color: #ff3385;
+}
+
+.clear-btn:hover {
+    background-color: #ff9933;
+}
