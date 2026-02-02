@@ -1,4 +1,3 @@
-
 require("dotenv").config();
 const express = require("express");
 const { Pool } = require("pg");
@@ -21,6 +20,7 @@ db.on('error', (err) => {
     console.error('Unexpected error on idle client', err);
 });
 
+// Test connection
 db.query('SELECT NOW()', (err, result) => {
     if (err) {
         console.error("Database connection failed:", err);
@@ -33,9 +33,7 @@ db.query('SELECT NOW()', (err, result) => {
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json()); // Add this line
-// Add this in your middleware section
-app.use(express.static("public"));
+app.use(bodyParser.json());
 app.use(
     session({
         secret: process.env.SESSION_SECRET || "your_secret_key",
@@ -100,18 +98,18 @@ const logBlockedUser = (username, ip) => {
 
 const trackFailedLogin = (username, ip, callback) => {
     db.query(
-        "SELECT * FROM failed_logins WHERE username = ?",
+        "SELECT * FROM failed_logins WHERE username = $1",
         [username],
         (err, results) => {
             if (err) throw err;
 
             let attempts = 1;
 
-            if (results.length > 0) {
-                attempts = results[0].attempts + 1;
+            if (results.rows.length > 0) {
+                attempts = results.rows[0].attempts + 1;
 
                 db.query(
-                    "UPDATE failed_logins SET attempts = ?, last_attempt = CURRENT_TIMESTAMP WHERE username = ?",
+                    "UPDATE failed_logins SET attempts = $1, last_attempt = CURRENT_TIMESTAMP WHERE username = $2",
                     [attempts, username],
                     () => {
                         if (attempts >= 5) {
@@ -122,7 +120,7 @@ const trackFailedLogin = (username, ip, callback) => {
                 );
             } else {
                 db.query(
-                    "INSERT INTO failed_logins (username, ip, attempts) VALUES (?, ?, 1)",
+                    "INSERT INTO failed_logins (username, ip, attempts) VALUES ($1, $2, 1)",
                     [username, ip],
                     () => callback(attempts)
                 );
@@ -133,7 +131,7 @@ const trackFailedLogin = (username, ip, callback) => {
 
 const blockUser = (username, ip) => {
     db.query(
-        "INSERT IGNORE INTO blocked_users (username, ip) VALUES (?, ?)",
+        "INSERT INTO blocked_users (username, ip) VALUES ($1, $2) ON CONFLICT (username) DO NOTHING",
         [username, ip],
         (err) => {
             if (err) throw err;
@@ -144,20 +142,19 @@ const blockUser = (username, ip) => {
 
 const isBlocked = (username, callback) => {
     db.query(
-        "SELECT * FROM blocked_users WHERE username = ?",
+        "SELECT * FROM blocked_users WHERE username = $1",
         [username],
         (err, results) => {
             if (err) throw err;
-            callback(results.length > 0);
+            callback(results.rows.length > 0);
         }
     );
 };
 
 const clearFailedLogins = (username) => {
-    db.query("DELETE FROM failed_logins WHERE username = ?", [username]);
+    db.query("DELETE FROM failed_logins WHERE username = $1", [username]);
 };
 
-// Add this utility function at the top with other utility functions
 const getAdminData = (callback) => {
     db.query("SELECT * FROM blocked_users", (err, blockedUsers) => {
         if (err) throw err;
@@ -171,10 +168,10 @@ const getAdminData = (callback) => {
                 db.query("SELECT username, email, last_login_time FROM users WHERE status = 'approved' AND logout_time IS NULL", 
                 (err, activeUsers) => {
                     callback({
-                        blockedUsers: blockedUsers,
-                        unblockRequests: unblockRequests,
-                        signupRequests: signupRequests,
-                        activeUsers: activeUsers
+                        blockedUsers: blockedUsers.rows,
+                        unblockRequests: unblockRequests.rows,
+                        signupRequests: signupRequests.rows,
+                        activeUsers: activeUsers.rows
                     });
                 });
             });
@@ -189,9 +186,6 @@ app.get("/signup", (req, res) => {
     res.render("signup", { message: "" });
 });
 
-// ==========================
-// ✅ Modified Signup Route
-// ==========================
 app.post("/signup", (req, res) => {
     const { username, email, password, phone, location } = req.body;
 
@@ -200,7 +194,7 @@ app.post("/signup", (req, res) => {
 
         db.query(
             `INSERT INTO users (username, email, password, phone, location, status)
-             VALUES (?, ?, ?, ?, ?, 'pending')`,
+             VALUES ($1, $2, $3, $4, $5, 'pending')`,
             [username, email, hashedPassword, phone, location],
             (error) => {
                 if (error) {
@@ -216,10 +210,8 @@ app.post("/signup", (req, res) => {
 });
 
 // ==========================
-// ✅ Login Route with Unblock Request Feature
+// ✅ Routes
 // ==========================
-
-
 app.get("/", (req, res) => {
     res.render("landing");
 });
@@ -227,8 +219,6 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
     res.render("login", { loginMessage: "", blocked: false, username: "" });
 });
-
-
 
 app.post("/login", async (req, res) => {
     const { username, password } = req.body;
@@ -238,6 +228,7 @@ app.post("/login", async (req, res) => {
         req.session.admin = true;
         return res.redirect("/admin");
     }
+
     if (!isWithinOfficeHours()) {
         return res.render("login", {
             loginMessage: "🚫 Login allowed only between 9:00 AM and 5:30 PM.",
@@ -246,7 +237,6 @@ app.post("/login", async (req, res) => {
         });
     }
 
-    // ❌ Check Location
     const inCUTM = await isUserInCUTM(ip);
     if (!inCUTM) {
         return res.render("login", {
@@ -255,7 +245,6 @@ app.post("/login", async (req, res) => {
             username
         });
     }
-
 
     isBlocked(username, (blocked) => {
         if (blocked) {
@@ -266,17 +255,16 @@ app.post("/login", async (req, res) => {
             });
         }
 
-        const sql = "SELECT * FROM users WHERE username = ?";
+        const sql = "SELECT * FROM users WHERE username = $1";
         db.query(sql, [username], (err, results) => {
             if (err) throw err;
 
-            if (results.length > 0) {
-                const user = results[0];
+            if (results.rows.length > 0) {
+                const user = results.rows[0];
 
                 bcrypt.compare(password, user.password, (err, match) => {
                     if (err) throw err;
 
-                    // Add this check
                     if (match) {
                         if (user.status !== 'approved') {
                             return res.render("login", {
@@ -290,7 +278,7 @@ app.post("/login", async (req, res) => {
                         clearFailedLogins(username);
 
                         db.query(
-                            "UPDATE users SET last_login_time = NOW() WHERE username = ?",
+                            "UPDATE users SET last_login_time = NOW() WHERE username = $1",
                             [username],
                             () => res.redirect("/dashboard")
                         );
@@ -325,16 +313,13 @@ app.post("/login", async (req, res) => {
     });
 });
 
-// ==========================
-// ✅ Logout with Logout Time Storage
-// ==========================
 app.get("/logout", (req, res) => {
     if (!req.session.user) return res.redirect("/");
 
     const username = req.session.user.username;
 
     db.query(
-        "UPDATE users SET logout_time = NOW() WHERE username = ?",
+        "UPDATE users SET logout_time = NOW() WHERE username = $1",
         [username],
         (err) => {
             if (err) {
@@ -345,59 +330,40 @@ app.get("/logout", (req, res) => {
     );
 });
 
-
-// ==========================
-// ✅ User Dashboard
-// ==========================
 app.get("/dashboard", (req, res) => {
     if (!req.session.user) return res.redirect("/");
 
     const username = req.session.user.username;
 
     db.query(
-        "SELECT * FROM users WHERE username = ?",
+        "SELECT * FROM users WHERE username = $1",
         [username],
         (err, results) => {
             if (err) throw err;
-            const user = results[0];
+            const user = results.rows[0];
             res.render("dashboard", { user });
         }
     );
 });
 
-
-// ==========================
-// ✅ Admin Panel to View Unblock Requests
-// ==========================
 app.get("/admin", (req, res) => {
-    const blockedUsersQuery = "SELECT * FROM blocked_users";
-    const unblockRequestsQuery = "SELECT * FROM unblock_requests WHERE status = 'pending'";
-
-    db.query(blockedUsersQuery, (err, blockedUsers) => {
-        if (err) throw err;
-
-        db.query(unblockRequestsQuery, (err, unblockRequests) => {
-            if (err) throw err;
-
-            res.render("admin", {
-                blockedUsers: blockedUsers,
-                unblockRequests: unblockRequests
-            });
-        });
+    if (!req.session.admin) return res.redirect("/login");
+    
+    getAdminData((data) => {
+        res.render("admin", data);
     });
 });
 
-// ✅ Unblock Request Route
 app.post("/request-unblock", (req, res) => {
     const { username } = req.body;
 
     db.query(
-        "SELECT * FROM unblock_requests WHERE username = ? AND status = 'pending'",
+        "SELECT * FROM unblock_requests WHERE username = $1 AND status = 'pending'",
         [username],
         (err, results) => {
             if (err) throw err;
 
-            if (results.length > 0) {
+            if (results.rows.length > 0) {
                 return res.render("login", {
                     loginMessage: "⏳ Unblock request already submitted.",
                     blocked: true,
@@ -406,7 +372,7 @@ app.post("/request-unblock", (req, res) => {
             }
 
             db.query(
-                "INSERT INTO unblock_requests (username, status, request_time) VALUES (?, 'pending', NOW())",
+                "INSERT INTO unblock_requests (username, status, request_time) VALUES ($1, 'pending', NOW())",
                 [username],
                 (err) => {
                     if (err) throw err;
@@ -424,30 +390,29 @@ app.post("/request-unblock", (req, res) => {
 app.post("/unblock-user", (req, res) => {
     const { username } = req.body;
 
-    db.query("DELETE FROM blocked_users WHERE username = ?", [username], (err) => {
+    db.query("DELETE FROM blocked_users WHERE username = $1", [username], (err) => {
         if (err) throw err;
 
-        db.query("UPDATE unblock_requests SET status = 'approved' WHERE username = ?", [username], (err) => {
+        db.query("UPDATE unblock_requests SET status = 'approved' WHERE username = $1", [username], (err) => {
             if (err) throw err;
             res.redirect("/admin");
         });
     });
 });
 
-// ✅ Approve Unblock Request
 app.post("/approve-request", (req, res) => {
     const { id } = req.body;
 
-    db.query("SELECT * FROM unblock_requests WHERE id = ?", [id], (err, results) => {
+    db.query("SELECT * FROM unblock_requests WHERE id = $1", [id], (err, results) => {
         if (err) throw err;
 
-        if (results.length > 0) {
-            const { username } = results[0];
+        if (results.rows.length > 0) {
+            const { username } = results.rows[0];
 
-            db.query("DELETE FROM blocked_users WHERE username = ?", [username], (err) => {
+            db.query("DELETE FROM blocked_users WHERE username = $1", [username], (err) => {
                 if (err) throw err;
 
-                db.query("DELETE FROM unblock_requests WHERE id = ?", [id], (err) => {
+                db.query("DELETE FROM unblock_requests WHERE id = $1", [id], (err) => {
                     if (err) throw err;
                     res.redirect("/admin");
                 });
@@ -458,23 +423,22 @@ app.post("/approve-request", (req, res) => {
     });
 });
 
-// ✅ Reject Unblock Request
 app.post("/reject-request", (req, res) => {
     const { id } = req.body;
 
-    db.query("SELECT * FROM unblock_requests WHERE id = ?", [id], (err, results) => {
+    db.query("SELECT * FROM unblock_requests WHERE id = $1", [id], (err, results) => {
         if (err) throw err;
 
-        if (results.length > 0) {
-            const { username, ip } = results[0];
+        if (results.rows.length > 0) {
+            const { username, ip } = results.rows[0];
 
             db.query(
-                "INSERT INTO rejected_requests (username, ip, rejected_at) VALUES (?, ?, NOW())",
+                "INSERT INTO rejected_requests (username, ip, rejected_at) VALUES ($1, $2, NOW())",
                 [username, ip],
                 (err) => {
                     if (err) throw err;
 
-                    db.query("DELETE FROM unblock_requests WHERE id = ?", [id], (err) => {
+                    db.query("DELETE FROM unblock_requests WHERE id = $1", [id], (err) => {
                         if (err) throw err;
                         res.redirect("/admin");
                     });
@@ -486,40 +450,11 @@ app.post("/reject-request", (req, res) => {
     });
 });
 
-// Update the admin routes section to:
-// ==========================
-// ✅ Admin Panel Routes
-// ==========================
-app.get("/admin", (req, res) => {
-    if (!req.session.admin) return res.redirect("/login");
-    
-    getAdminData((data) => {
-        res.render("admin", data);
-    });
-});
-
-app.get("/admin/signup-requests", (req, res) => {
-    if (!req.session.admin) return res.redirect("/login");
-    
-    getAdminData((data) => {
-        res.render("admin", data);
-    });
-});
-
-app.get("/admin/active-users", (req, res) => {
-    if (!req.session.admin) return res.redirect("/login");
-    
-    getAdminData((data) => {
-        res.render("admin", data);
-    });
-});
-
-// Update the approval/reject routes:
 app.post("/admin/approve-user", (req, res) => {
     const { userId } = req.body;
 
     db.query(
-        "UPDATE users SET status = 'approved' WHERE id = ?",
+        "UPDATE users SET status = 'approved' WHERE id = $1",
         [userId],
         (err) => {
             if (err) throw err;
@@ -532,7 +467,7 @@ app.post("/admin/reject-user", (req, res) => {
     const { userId } = req.body;
 
     db.query(
-        "UPDATE users SET status = 'rejected' WHERE id = ?",
+        "UPDATE users SET status = 'rejected' WHERE id = $1",
         [userId],
         (err) => {
             if (err) throw err;
@@ -540,46 +475,28 @@ app.post("/admin/reject-user", (req, res) => {
         }
     );
 });
-// ==========================
-// ✅ Active Users Tracking
-// ==========================
-app.get("/admin/active-users", (req, res) => {
-    if (!req.session.admin) return res.redirect("/login");
-
-    db.query(
-        "SELECT username, email, last_login_time FROM users WHERE status = 'approved' AND logout_time IS NULL",
-        (err, activeUsers) => {
-            if (err) throw err;
-
-            res.render("admin", {
-                blockedUsers: req.body.blockedUsers,
-                unblockRequests: req.body.unblockRequests,
-                activeUsers: activeUsers
-            });
-        }
-    );
-});
 
 app.get("/projects", (req, res) => {
     res.render("projects");
 });
+
 app.get("/chat", (req, res) => {
     res.render("chat");
 });
 
-// Single-page Notes Routes
+// ✅ Notes Routes
 app.get("/notes", (req, res) => {
     if (!req.session.user) return res.redirect("/login");
 
     const userId = req.session.user.id;
 
     db.query(
-        "SELECT id, title FROM notes WHERE user_id = ? ORDER BY updated_at DESC",
+        "SELECT id, title FROM notes WHERE user_id = $1 ORDER BY updated_at DESC",
         [userId],
         (err, notes) => {
             if (err) throw err;
             res.render("notes-single", {
-                notes: notes,
+                notes: notes.rows,
                 currentNote: null
             });
         }
@@ -593,9 +510,8 @@ app.post("/api/notes", (req, res) => {
     const userId = req.session.user.id;
 
     if (noteId) {
-        // Update existing note
         db.query(
-            "UPDATE notes SET title = ?, content = ? WHERE id = ? AND user_id = ?",
+            "UPDATE notes SET title = $1, content = $2 WHERE id = $3 AND user_id = $4",
             [title, content, noteId, userId],
             (err) => {
                 if (err) throw err;
@@ -603,15 +519,14 @@ app.post("/api/notes", (req, res) => {
             }
         );
     } else {
-        // Create new note
         db.query(
-            "INSERT INTO notes (user_id, title, content) VALUES (?, ?, ?)",
+            "INSERT INTO notes (user_id, title, content) VALUES ($1, $2, $3)",
             [userId, title, content],
             (err, result) => {
                 if (err) throw err;
                 res.json({
                     success: true,
-                    newId: result.insertId
+                    newId: result.rows[0].id
                 });
             }
         );
@@ -625,11 +540,11 @@ app.get("/api/notes/:id", (req, res) => {
     const userId = req.session.user.id;
 
     db.query(
-        "SELECT * FROM notes WHERE id = ? AND user_id = ?",
+        "SELECT * FROM notes WHERE id = $1 AND user_id = $2",
         [noteId, userId],
         (err, results) => {
             if (err) throw err;
-            res.json(results[0] || {});
+            res.json(results.rows[0] || {});
         }
     );
 });
@@ -641,7 +556,7 @@ app.delete("/api/notes/:id", (req, res) => {
     const userId = req.session.user.id;
 
     db.query(
-        "DELETE FROM notes WHERE id = ? AND user_id = ?",
+        "DELETE FROM notes WHERE id = $1 AND user_id = $2",
         [noteId, userId],
         (err) => {
             if (err) throw err;
@@ -652,6 +567,13 @@ app.delete("/api/notes/:id", (req, res) => {
 
 app.get("/document", (req, res) => {
     res.render("document", { message: "" });
+});
+
+// ==========================
+// ✅ Health Check (for Render uptime)
+// ==========================
+app.get("/health", (req, res) => {
+    res.status(200).send("OK");
 });
 
 // ==========================
